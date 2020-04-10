@@ -16,6 +16,34 @@ app.use(express.static(publicPath));
 io.on('connection', (socket)=>{
     console.log("New user connected");
 
+
+    socket.emit('newMessage', {
+        from: 'Admin',
+        text: 'Bienvenido al juego',
+        createdAt: new Date().getTime
+    });
+
+    socket.broadcast.emit('newMessage', {
+        from: 'Admin',
+        text: 'Un nuevo usuario se unio al juego',
+        createdAt: new Date().getTime
+    });
+
+
+
+    socket.on('message', (message) =>{
+        console.log("message", message);
+        //io es para todos los conectados y socket es para cada uno individual
+        io.emit('newMessage',{
+            from: message.from,
+            text: message.text,
+            createdAt: new Date().getTime()
+        })
+
+        //socket broadcast manda mensaje menos a la permisa que hizo el emit
+
+    })
+
     socket.on('disconnect', () =>{
         console.log("User disconnected");
     });

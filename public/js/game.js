@@ -22,6 +22,11 @@ socket.on('disconnect', () =>{
 
 socket.on('updateUsersList', (users) =>{
     console.log(users);
+    if(users.length > 2){
+        alert("No pueden estar más de 2 usuarios en una sala. Intenta ingresas a otra sala o crea tu sala.")
+        window.location.href = '/';
+    }
+
     let ol = document.createElement('ol');
     users.forEach((user) =>{
         let li = document.createElement('li');
@@ -31,6 +36,22 @@ socket.on('updateUsersList', (users) =>{
     let userList = document.querySelector('#users');
     userList.innerHTML = "";
     userList.appendChild(ol);
+
+    if(users.length == 2){
+        //startGame();
+        document.getElementById("play-btn").style.display ='block';
+        
+    }
+    
+});
+
+socket.on('roomNumber', (room) =>{
+    console.log("Room: ",room);
+    let p = document.createElement('p');
+    p.innerHTML = "Te encuentra en la sala: " +room;
+    let roomName = document.querySelector('#roomNumberName');
+    roomName.innerHTML = "";
+    roomName.appendChild(p);
 })
 
 socket.on('newMessage', (message)=>{
@@ -53,9 +74,38 @@ document.querySelector("#submit-bnt").addEventListener('click', (e)=>{
 
     socket.emit("message", {
         from: "User",
-        text: document.querySelector('input[name="message"]').value
+        text: document.getElementById('mensaje').value
     }, () =>{
 
     })
 })
 
+document.querySelector("#play-btn").addEventListener('click', (e)=>{
+    e.preventDefault();
+    console.log("Click en btn play");
+
+    socket.emit("playBtn", true);
+});
+
+socket.on("startGame", ()=>{
+    console.log("YA REGRESÉ");
+    var timeleft = 10;
+    var downloadTimer = setInterval(function(){
+    if(timeleft <= 0){
+        clearInterval(downloadTimer);
+        document.getElementById("countdown").innerHTML = "Finished";
+    } else {
+        document.getElementById("countdown").innerHTML = "El juego comenzará en: " + timeleft;
+    }
+    timeleft -= 1;
+    }, 1000);
+})
+
+
+
+startGame = () =>{
+
+}
+
+//socket emit mando el evento
+//socket on espero a recibir 

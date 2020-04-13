@@ -23,7 +23,6 @@ io.on('connection', (socket)=>{
     console.log("Usuarios conectados", connectCounter);
     console.log("New user connected");
 
-   
     //Vamos a estar escuchando si entra a un nuevo room
     socket.on('join', (params, callback) =>{
          //Nos falta validar que sean string los inputs
@@ -47,6 +46,8 @@ io.on('connection', (socket)=>{
 
         //Mensaje le sale cada que se conecta el usuario a todos los demas
         socket.broadcast.emit('newMessage', generateMessage('Admin', 'Un nuevo usuario se unio al juego'));
+
+        socket.broadcast.emit('newMessage', generateMessage('Admin', 'El contrincante ya acabó, tienes 10 segundos para terminar.'))
 
 
         callback();
@@ -82,16 +83,30 @@ io.on('connection', (socket)=>{
         console.log("Btn del lado del servidor");
         let user = users.getUser(socket.id);
         if(startGame){
-            console.log("Entre al if del lado del servidor y el room es:" + users.room);
-            io.to(user.room).emit('startGame');
+            console.log("Entre al if del lado del servidor y el room es:" + user.room);
+            let character = getCharacter()
+            io.to(user.room).emit('startGame', character);
         }
-    })
+    });
+
+    socket.on('basta', () =>{
+        console.log("BASTA del lado del server");
+        let user = users.getUser(socket.id);
+        io.to(user.room).emit('basta',user.name);
+    });
 
 
     
 })
 
 
+getCharacter = () =>{
+    var result = '';
+    var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    var charactersLength = characters.length;
+    result = characters.charAt(Math.floor(Math.random() * charactersLength));
+    return result;
+}
 
 server.listen(3000, ()=>{
     console.log("Server up on port 3000");

@@ -48,7 +48,7 @@ socket.on('updateUsersList', (users) =>{
 socket.on('roomNumber', (room) =>{
     console.log("Room: ",room);
     let p = document.createElement('p');
-    p.innerHTML = "Te encuentra en la sala: " +room;
+    p.innerHTML = "El nombre de tu sala es: <br> <strong>"+room+"</strong>";
     let roomName = document.querySelector('#roomNumberName');
     roomName.innerHTML = "";
     roomName.appendChild(p);
@@ -87,13 +87,14 @@ document.querySelector("#play-btn").addEventListener('click', (e)=>{
     socket.emit("playBtn", true);
 });
 
-socket.on("startGame", ()=>{
+socket.on("startGame", (character)=>{
     console.log("YA REGRESÉ");
-    var timeleft = 10;
-    var downloadTimer = setInterval(function(){
+    var timeleft = 5;
+    var countDownTimer = setInterval(function(){
     if(timeleft <= 0){
-        clearInterval(downloadTimer);
-        document.getElementById("countdown").innerHTML = "Finished";
+        clearInterval(countDownTimer);
+        startGame(character);
+
     } else {
         document.getElementById("countdown").innerHTML = "El juego comenzará en: " + timeleft;
     }
@@ -101,11 +102,37 @@ socket.on("startGame", ()=>{
     }, 1000);
 })
 
+socket.on('basta', (user) =>{
+    var timeleft = 10;
+    var countDownTimer = setInterval(function(){
+    if(timeleft <= 0){
+        clearInterval(countDownTimer);
+        document.getElementById("final-countdown").innerHTML = "TIEMPO";
+        document.getElementById("game-form").style.display = "none";
+    } else {
+        document.getElementById("final-countdown").innerHTML = "El jugador: "+user+" ha dicho BASTA, tienes " + timeleft +"segundos para terminar";
+    }
+    timeleft -= 1;
+    }, 1000);
+});
 
 
-startGame = () =>{
 
+document.querySelector("#basta-btn").addEventListener('click', (e)=>{
+    e.preventDefault();
+    console.log("BASTA");
+    socket.emit("basta");
+});
+
+
+startGame = (character) =>{
+    document.getElementById("countdown").innerHTML = "EMPIEZA";
+    document.getElementById("game-form").style.display = "block";
+    //let character = getCharacter();
+    document.getElementById("character").innerHTML = "La letra es: "+character;
 }
+
+
 
 //socket emit mando el evento
 //socket on espero a recibir 

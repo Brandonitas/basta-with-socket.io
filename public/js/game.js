@@ -68,21 +68,10 @@ socket.on('roomNumber', (room) =>{
     roomName.appendChild(p);
 })
 
-document.querySelector("#submit-bnt").addEventListener('click', (e)=>{
-    e.preventDefault();
-
-    socket.emit("message", {
-        from: "User",
-        text: document.getElementById('mensaje').value
-    }, () =>{
-
-    })
-})
 
 document.querySelector("#play-btn").addEventListener('click', (e)=>{
     e.preventDefault();
     console.log("Click en btn play");
-
 
     socket.emit("playBtn", true);
 });
@@ -91,6 +80,13 @@ socket.on("startGame", (character)=>{
     document.getElementById("final-countdown").innerHTML = "";
     document.getElementById("winner").innerHTML = '';
     document.getElementById("character").innerHTML = '';
+    char = '';
+    document.getElementById('nombre').value = '';
+    document.getElementById('color').value = '';
+    document.getElementById('fruto').value = '';
+    document.getElementById('objeto').value = '';
+    document.getElementById('lugar').value = '';
+    document.getElementById('animal').value = '';
 
     char = character;
     console.log("YA REGRESÉ");
@@ -118,7 +114,7 @@ socket.on('basta', (user) =>{
         endGame();
 
     } else {
-        document.getElementById("final-countdown").innerHTML = "El jugador: "+user+" ha dicho BASTA, tienes " + timeleft +"segundos para terminar";
+        document.getElementById("final-countdown").innerHTML = "El jugador: "+user+" ha dicho BASTA, tienes " + timeleft +" segundos para terminar";
     }
     timeleft -= 1;
     }, 1000);
@@ -156,6 +152,7 @@ endGame= ()=>{
     resultados.objeto = document.getElementById('objeto').value;
     resultados.lugar = document.getElementById('lugar').value;
     resultados.animal = document.getElementById('animal').value;
+    console.log("RESULTADOS", resultados);
     socket.emit('endGame', resultados);
 }
 

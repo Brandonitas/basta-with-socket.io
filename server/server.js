@@ -81,8 +81,12 @@ io.on('connection', (socket)=>{
         let user = users.getUser(socket.id);
         //console.log("Usuario",user.name);
         //console.log("Resultados",resultados);
+        if(answer.getAnswerList(user.room).length == 2){
+            answer.removeAnswers(user.room);
+        }
 
         answer.addAnswer(resultados.char,socket.id, user.name, user.room, resultados.nombre,resultados.color,resultados.fruto,resultados.objeto,resultados.lugar,resultados.animal)
+        
         if(answer.getAnswerList(user.room).length == 2){
             let winnerResult = winner.getWinner(answer.getAnswerList(user.room));
             console.log(winnerResult);

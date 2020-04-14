@@ -31,13 +31,9 @@ class Answer{
         return this.users.filter((user) => user.id ===id)[0];
     }*/
 
-    /*removeUser(id){
-        let user = this.getUser(id);
-        if(user){
-            this.users = this.users.filter((user) => user.id != id);
-        }
-        return user;
-    }*/
+    removeAnswers(room){
+        this.answers = [];
+    }
 
 }
 

@@ -79,7 +79,8 @@ class Winner{
 
 
         //Comparamos si tienen las mismas respeustas y restamos 50 puntos
-        if(isRealString(user1.nombre) && isRealString(user2.nombre) && (user1.nombre == user2.nomre)){
+        if(isRealString(user1.nombre) && isRealString(user2.nombre) && (user1.nombre == user2.nombre)){
+            console.log("SÍ ENTRE A UNO Y RESTÉ 50");
             pointUser1 -= 50;
             pointUser2 -= 50;
         }

@@ -104,6 +104,7 @@ socket.on("startGame", (character)=>{
 })
 
 socket.on('basta', (user) =>{
+    document.getElementById('basta-btn').style.display = 'none';
     var timeleft = 10;
     var countDownTimer = setInterval(function(){
     if(timeleft <= 0){
@@ -139,6 +140,7 @@ document.querySelector("#basta-btn").addEventListener('click', (e)=>{
 
 startGame = (character) =>{
     document.getElementById("countdown").innerHTML = "EMPIEZA";
+    document.getElementById('basta-btn').style.display = 'block';
     document.getElementById("game-form").style.display = "block";
     //let character = getCharacter();
     document.getElementById("character").innerHTML = "La letra es: "+character;

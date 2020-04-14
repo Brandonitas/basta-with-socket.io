@@ -2,15 +2,18 @@ const path = require('path');
 const express = require('express');
 const socketIO = require('socket.io');
 const http = require('http');
-const {generateMessage} = require('./utils/message');
 const {isRealString} = require('./utils/isRealString');
 const {Users} = require('./utils/users');
+const {Answer} = require('./utils/answers');
+const {Winner} = require('./utils/winner');
 
 const publicPath = path.join(__dirname, '/../public');
 let app = express();
 let server = http.createServer(app);
 let io = socketIO(server);
 let users = new Users();
+let answer = new Answer();
+let winner = new Winner();
 
 app.use(express.static(publicPath));
 
@@ -36,36 +39,16 @@ io.on('connection', (socket)=>{
          users.removeUser(socket.id);
          users.addUser(socket.id, params.name, params.room);
 
+         if(users.getUserList(params.room).length > 2){
+             return callback('Sala llena');
+         }
+
          //Con emit le aviso al front end
          io.to(params.room).emit('updateUsersList', users.getUserList(params.room));
          io.to(params.room).emit('roomNumber', params.room);
 
-
-        //Mensaje le sale cada que se conecta el usuario
-        socket.emit('newMessage', generateMessage('Admin', 'Bienvenido al juego de basta en el room: '+params.room));
-
-        //Mensaje le sale cada que se conecta el usuario a todos los demas
-        socket.broadcast.emit('newMessage', generateMessage('Admin', 'Un nuevo usuario se unio al juego'));
-
-        socket.broadcast.emit('newMessage', generateMessage('Admin', 'El contrincante ya acabó, tienes 10 segundos para terminar.'))
-
-
         callback();
     });
-
-    socket.on('message', (message, callback) =>{
-        console.log("message", message);
-        let user = users.getUser(socket.id);
-        if(user && isRealString(message.text)){
-            io.to(user.room).emit('newMessage',generateMessage(user.name, message.text))
-        }
-        //io es para todos los conectados y socket es para cada uno individual
-        //io.emit('newMessage',generateMessage(message.from, message.text))
-        
-        //socket broadcast manda mensaje menos a la permisa que hizo el emit
-        callback('Esto es el servidor');
-    });
-
     
     socket.on('disconnect', () =>{
         console.log("User disconnected");
@@ -73,7 +56,6 @@ io.on('connection', (socket)=>{
 
         if(user){
             io.to(user.room).emit('updateUsersList', users.getUserList(user.room));
-            io.to(user.room).emit('newMessage', generateMessage('Admin', `${user.name} ha dejado la sala: ${user.room}`));
         }
         connectCounter--;
         console.log("Usuarios conectados", connectCounter);
@@ -95,7 +77,19 @@ io.on('connection', (socket)=>{
         io.to(user.room).emit('basta',user.name);
     });
 
+    socket.on('endGame', (resultados) =>{
+        let user = users.getUser(socket.id);
+        //console.log("Usuario",user.name);
+        //console.log("Resultados",resultados);
 
+        answer.addAnswer(resultados.char,socket.id, user.name, user.room, resultados.nombre,resultados.color,resultados.fruto,resultados.objeto,resultados.lugar,resultados.animal)
+        if(answer.getAnswerList(user.room).length == 2){
+            let winnerResult = winner.getWinner(answer.getAnswerList(user.room));
+            console.log(winnerResult);
+            io.to(user.room).emit('endGame', winnerResult);
+        }
+        //let winner = calculateWinner(resultadosToCompare);        
+    })
     
 })
 
@@ -111,5 +105,3 @@ getCharacter = () =>{
 server.listen(3000, ()=>{
     console.log("Server up on port 3000");
 });
-
-//Socket io

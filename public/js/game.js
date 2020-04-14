@@ -1,5 +1,17 @@
 let socket = io();
 
+let resultados = {
+    char: '',
+    nombre: '',
+    color: '',
+    fruto: '',
+    objeto: '',
+    lugar: '',
+    animal: ''
+}
+
+let char = '';
+
 socket.on('connect', () =>{
     console.log("Connected to server");
 
@@ -22,10 +34,10 @@ socket.on('disconnect', () =>{
 
 socket.on('updateUsersList', (users) =>{
     console.log(users);
-    if(users.length > 2){
+    /*if(users.length > 2){
         alert("No pueden estar más de 2 usuarios en una sala. Intenta ingresas a otra sala o crea tu sala.")
         window.location.href = '/';
-    }
+    }*/
 
     let ol = document.createElement('ol');
     users.forEach((user) =>{
@@ -41,6 +53,8 @@ socket.on('updateUsersList', (users) =>{
         //startGame();
         document.getElementById("play-btn").style.display ='block';
         
+    }else{
+        document.getElementById("play-btn").style.display ='none';
     }
     
 });
@@ -53,21 +67,6 @@ socket.on('roomNumber', (room) =>{
     roomName.innerHTML = "";
     roomName.appendChild(p);
 })
-
-socket.on('newMessage', (message)=>{
-    console.log("newMessage", message);
-    let li = document.createElement('li');
-    li.innerText = `${message.from} : ${message.text}`
-
-    document.querySelector('body').appendChild(li);
-});
-
-socket.emit('message', {
-    
-    text: "Texto"
-}, ()=>{
-    console.log("Server obtuvo el mensaje")
-});
 
 document.querySelector("#submit-bnt").addEventListener('click', (e)=>{
     e.preventDefault();
@@ -84,16 +83,22 @@ document.querySelector("#play-btn").addEventListener('click', (e)=>{
     e.preventDefault();
     console.log("Click en btn play");
 
+
     socket.emit("playBtn", true);
 });
 
 socket.on("startGame", (character)=>{
+    document.getElementById("final-countdown").innerHTML = "";
+    document.getElementById("winner").innerHTML = '';
+    document.getElementById("character").innerHTML = '';
+
+    char = character;
     console.log("YA REGRESÉ");
     var timeleft = 5;
     var countDownTimer = setInterval(function(){
     if(timeleft <= 0){
         clearInterval(countDownTimer);
-        startGame(character);
+        startGame(char);
 
     } else {
         document.getElementById("countdown").innerHTML = "El juego comenzará en: " + timeleft;
@@ -109,6 +114,9 @@ socket.on('basta', (user) =>{
         clearInterval(countDownTimer);
         document.getElementById("final-countdown").innerHTML = "TIEMPO";
         document.getElementById("game-form").style.display = "none";
+
+        endGame();
+
     } else {
         document.getElementById("final-countdown").innerHTML = "El jugador: "+user+" ha dicho BASTA, tienes " + timeleft +"segundos para terminar";
     }
@@ -117,6 +125,14 @@ socket.on('basta', (user) =>{
 });
 
 
+socket.on('showResults', (user, results) =>{
+    console.log("El usuario es:", user);
+    console.log("Sus resultados fueron:", results);
+})
+
+socket.on('endGame', (winner)=>{
+    document.getElementById("winner").innerHTML = winner;
+})
 
 document.querySelector("#basta-btn").addEventListener('click', (e)=>{
     e.preventDefault();
@@ -130,6 +146,17 @@ startGame = (character) =>{
     document.getElementById("game-form").style.display = "block";
     //let character = getCharacter();
     document.getElementById("character").innerHTML = "La letra es: "+character;
+}
+
+endGame= ()=>{
+    resultados.char = char;
+    resultados.nombre = document.getElementById('nombre').value;
+    resultados.color = document.getElementById('color').value;
+    resultados.fruto = document.getElementById('fruto').value;
+    resultados.objeto = document.getElementById('objeto').value;
+    resultados.lugar = document.getElementById('lugar').value;
+    resultados.animal = document.getElementById('animal').value;
+    socket.emit('endGame', resultados);
 }
 
 
